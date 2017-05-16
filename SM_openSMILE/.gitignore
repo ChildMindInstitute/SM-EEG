@@ -1,0 +1,27 @@
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+
+# not ready for prime time #
+############################
+*tinkering*
+
+# caches #
+##########
+.gitignore~
+*__pycache__*
+
+# not mine to share #
+#####################
+openSMILE_preprocessing/noise_replacement/test.wav
+audio_files
+
+# utilities #
+#############
+git-mv-with-history
+
+# data & OSF #
+##############
+*.svg
+*.png

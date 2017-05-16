@@ -1,0 +1,5 @@
+,sum(MAD),mean(MAD),median(MAD),rank(sum(MAD)),rank(mean(MAD)),rank(median(MAD))
+ComParE_2016 > M00452447_vocal_w_long_no_beep > no_beeps,0.0,0.0,0.0,1,1,1
+ComParE_2016 > M00452447_vocal_w_long_no_beep > clone_fill,5895.0,0.9442575684766938,1.0,2,2,2
+ComParE_2016 > M00452447_vocal_w_long_no_beep > timeshifted,8527.0,1.3658497517219286,1.0,3,3,2
+ComParE_2016 > M00452447_vocal_w_long_no_beep > sample_silenced,13106.0,2.099311228576005,2.0,4,4,4

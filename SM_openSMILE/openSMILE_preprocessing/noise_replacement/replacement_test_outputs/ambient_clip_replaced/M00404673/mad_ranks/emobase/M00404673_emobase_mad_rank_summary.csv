@@ -1,0 +1,5 @@
+,sum(MAD),mean(MAD),median(MAD),rank(sum(MAD)),rank(mean(MAD)),rank(median(MAD))
+emobase > M00404673_vocal_w_long_no_beep > no_beeps,0.0,0.0,0.0,1,1,1
+emobase > M00404673_vocal_w_long_no_beep > clone_fill,1007.0,1.0804721030042919,1.0,2,2,2
+emobase > M00404673_vocal_w_long_no_beep > timeshifted,1436.0,1.5407725321888412,1.0,3,3,2
+emobase > M00404673_vocal_w_long_no_beep > sample_silenced,1845.0,1.9796137339055795,2.0,4,4,4
