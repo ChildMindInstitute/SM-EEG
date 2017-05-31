@@ -45,11 +45,11 @@ def build_table(oS, audio, config):
                         wav_file) + " -O " + temp
             subprocess.call(oScommand, shell=True)
             features_all = pd.read_csv(temp)
+            os.remove(temp)
             features = dict(zip(features_all.iloc[:-2][features_all.columns[-1]
                        ], features_all.iloc[-1].values[1].split(",")))
             table = table.append({"URSI":ursi, "stranger":condition, "trial":
             str(int(trial[-3:])), **features}, ignore_index=True)
-    os.remove(temp)
     return(table)
 
 def main():
