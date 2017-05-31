@@ -44,6 +44,7 @@ def build_table(oS, audio, config):
                 condition, trial = wav_file[-13:-4].lstrip("_").split("_")
                 oScommand = oS + " -C " + config + " -I " + os.path.join(audio,
                         wav_file) + " -O " + temp
+                print(oScommand)
                 subprocess.call(oScommand, shell=True)
                 features_all = pd.read_csv(temp)
                 os.remove(temp)
