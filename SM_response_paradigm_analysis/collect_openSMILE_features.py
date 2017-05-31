@@ -23,13 +23,13 @@ def build_table(oS, audio, config):
     ----------
     oS : string
         path to openSMILE binary
-  
+
     audio : string
         path to audio files
-   
+
     config : string
         path to openSMILE config file
-   
+
     Returns
     ------
     table : pandas dataframe
@@ -40,17 +40,19 @@ def build_table(oS, audio, config):
     for wav_file in os.listdir(audio):
         if ("vocal" in wav_file and "button" not in wav_file and
             wav_file.endswith(".wav")):
-            ursi = wav_file[:9]
-            condition, trial = wav_file[-13:-4].lstrip("_").split("_")
-            oScommand = oS + " -C " + config + " -I " + os.path.join(audio,
+                ursi = wav_file[:9]
+                condition, trial = wav_file[-13:-4].lstrip("_").split("_")
+                oScommand = oS + " -C " + config + " -I " + os.path.join(audio,
                         wav_file) + " -O " + temp
-            subprocess.call(oScommand, shell=True)
-            features_all = pd.read_csv(temp)
-            os.remove(temp)
-            features = dict(zip(features_all.iloc[:-2][features_all.columns[-1]
-                       ], features_all.iloc[-1].values[1].split(",")))
-            table = table.append({"URSI": ursi, "stranger": condition, "trial":
-                    str(int(trial[-3:])), **features}, ignore_index=True)
+                subprocess.call(oScommand, shell=True)
+                features_all = pd.read_csv(temp)
+                os.remove(temp)
+                features = dict(zip(features_all.iloc[:-2][
+                           features_all.columns[-1]], features_all.iloc[-1
+                           ].values[1].split(",")))
+                table = table.append({"URSI": ursi, "stranger": condition,
+                        "trial": str(int(trial[-3:])), **features},
+                        ignore_index=True)
     return(table)
 
 
@@ -98,7 +100,7 @@ def main():
     if not os.path.exists(outdir):
         os.makedirs(outdir)
     table = build_table(os.path.join(arg.openSMILE_directory, "inst", "bin",
-            "SMILExtract"), arg.audio, os.path.join(arg.openSMILE_directory, 
+            "SMILExtract"), arg.audio, os.path.join(arg.openSMILE_directory,
             "config", arg.config))
     print(table)
     table.to_csv(os.path.join(outdir, "features.csv"))
