@@ -17,7 +17,7 @@ from configuration_defaults import openSMILE_directory
 
 def build_table(oS, audio, config):
     """
-    Build and save
+    Build table with openSMILE features
 
     Parameters
     ----------
@@ -46,11 +46,8 @@ def build_table(oS, audio, config):
                         wav_file) + " -O " + temp
                 print(oScommand)
                 subprocess.call(oScommand, shell=True)
-                features_all = pd.read_csv(temp, engine="python")
+                features = read_temp(temp)
                 os.remove(temp)
-                features = dict(zip(features_all.iloc[:-2][
-                           features_all.columns[-1]], features_all.iloc[-1
-                           ].values[1].split(",")))
                 table = table.append({"URSI": ursi, "stranger": condition,
                         "trial": str(int(trial[-3:])), **features},
                         ignore_index=True)
@@ -106,6 +103,36 @@ def main():
     print(table)
     table.to_csv(os.path.join(outdir, "features.csv"))
 
+
+def read_temp(temp):
+    """
+    Read openSMILE features for a single file
+
+    Parameters
+    ----------
+    temp : string
+        path to openSMILE feature ARFF csv
+
+    Returns
+    ------
+    features : dictionary
+        dictionary of features from openSMILE output
+    """
+    type_dict = {"string": str, "unknown": str, "numeric": float}
+    with open(temp, 'r') as topen:
+        feature_lines = topen.readlines()
+    feature_labels = []
+    feature_types = []
+    for i, row in enumerate(feature_lines):
+        if row.startswith("@attribute"):
+            flabel, ftype = row[11:-1].split(' ')
+            feature_labels.append(flabel)
+            feature_types.append(type_dict[ftype])
+        elif row.startswith("@data"):
+            feature_values = feature_lines[i+2].split(",")
+    for i, item in enumerate(feature_values):
+        feature_values[i] = (feature_types[i](item))
+    return(dict(zip(feature_labels, feature_values)))
 
 # ============================================================================
 if __name__ == '__main__':
