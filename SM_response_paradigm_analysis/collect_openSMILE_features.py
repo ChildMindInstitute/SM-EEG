@@ -46,7 +46,7 @@ def build_table(oS, audio, config):
                         wav_file) + " -O " + temp
                 print(oScommand)
                 subprocess.call(oScommand, shell=True)
-                features_all = pd.read_csv(temp, sep=None)
+                features_all = pd.read_csv(temp, engine="python")
                 os.remove(temp)
                 features = dict(zip(features_all.iloc[:-2][
                            features_all.columns[-1]], features_all.iloc[-1
