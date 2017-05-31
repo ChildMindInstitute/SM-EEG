@@ -43,10 +43,10 @@ def build_table(oS, audio, config):
                 ursi = wav_file[:9]
                 condition, trial = wav_file[-13:-4].lstrip("_").split("_")
                 oScommand = oS + " -C " + config + " -I " + os.path.join(audio,
-                        wav_file) + " -csvoutput " + temp
+                        wav_file) + " -O " + temp
                 print(oScommand)
                 subprocess.call(oScommand, shell=True)
-                features_all = pd.read_csv(temp)
+                features_all = pd.read_csv(temp, sep=None)
                 os.remove(temp)
                 features = dict(zip(features_all.iloc[:-2][
                            features_all.columns[-1]], features_all.iloc[-1
