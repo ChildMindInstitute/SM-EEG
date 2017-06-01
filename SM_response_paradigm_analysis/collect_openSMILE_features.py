@@ -41,7 +41,7 @@ def build_table(oS, audio, config):
         if ("vocal" in wav_file and "button" not in wav_file and
             wav_file.endswith(".wav")):
                 ursi = wav_file[:9]
-                condition, trial = wav_file[-13:-4].lstrip("_").split("_")
+                condition, trial = wav_file[-13:-4].lstrip("_").split("_", 1)
                 oScommand = oS + " -C " + config + " -I " + os.path.join(audio,
                         wav_file) + " -O " + temp
                 print(oScommand)
