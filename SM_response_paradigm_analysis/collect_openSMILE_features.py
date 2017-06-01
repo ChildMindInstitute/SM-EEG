@@ -48,8 +48,13 @@ def build_table(oS, audio, config):
                 subprocess.call(oScommand, shell=True)
                 features = read_temp(temp)
                 os.remove(temp)
+                try:
+                    trial_no = str(int(trial[-3:]))
+                except:
+                    trial_no = str(int(wav_file.split("exp")[1].rstrip(".wav"))
+                               )
                 table = table.append({"URSI": ursi, "stranger": condition,
-                        "trial": str(int(trial[-3:])), **features},
+                        "trial": trial_no, **features},
                         ignore_index=True)
     return(table)
 
