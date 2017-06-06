@@ -53,10 +53,10 @@ def build_table(oS, audio, config):
                 except:
                     trial_no = str(int(wav_file.split("exp")[1].rstrip(".wav"))
                                )
-                table = table.append({"URSI": ursi, "stranger": condition,
-                        "trial": trial_no, **features},
+                table = table.append({"URSI": ursi.upper(), "stranger":
+                        condition, "observation": trial_no, **features},
                         ignore_index=True)
-    return(table)
+    return(table.sort_values(["URSI", "stranger", "observation"]))
 
 
 def main():
@@ -135,6 +135,8 @@ def read_temp(temp):
             feature_types.append(type_dict[ftype])
         elif row.startswith("@data"):
             feature_values = feature_lines[i+2].split(",")
+            if len(feature_values < len(feature_labels)):
+                feature_values = feature_lines[i+1].split(",")
     for i, item in enumerate(feature_values):
         feature_values[i] = (feature_types[i](item))
     return(dict(zip(feature_labels, feature_values)))
