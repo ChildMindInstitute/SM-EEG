@@ -134,9 +134,9 @@ def read_temp(temp):
             feature_labels.append(flabel)
             feature_types.append(type_dict[ftype])
         elif row.startswith("@data"):
-            feature_values = feature_lines[i+2].split(",")
-            if len(feature_values < len(feature_labels)):
-                feature_values = feature_lines[i+1].split(",")
+            feature_values = feature_lines[i+1].split(",")
+            if len(feature_values) < len(feature_labels):
+                feature_values = feature_lines[i+2].split(",")
     for i, item in enumerate(feature_values):
         feature_values[i] = (feature_types[i](item))
     return(dict(zip(feature_labels, feature_values)))
