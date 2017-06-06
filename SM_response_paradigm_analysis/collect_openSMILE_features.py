@@ -138,7 +138,10 @@ def read_temp(temp):
             if len(feature_values) < len(feature_labels):
                 feature_values = feature_lines[i+2].split(",")
     for i, item in enumerate(feature_values):
-        feature_values[i] = (feature_types[i](item))
+        try:
+            feature_values[i] = (feature_types[i](item))
+        except:
+            feature_values[i] = item
     return(dict(zip(feature_labels, feature_values)))
 
 # ============================================================================
