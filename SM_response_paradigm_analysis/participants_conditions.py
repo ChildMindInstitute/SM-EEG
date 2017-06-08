@@ -23,7 +23,7 @@ def main():
     table = pd.merge(pd.merge(all_URSIs, adults_speak, how="outer", on=["URSI",
             "stranger"]).fillna(False), extra_kid, how="outer", on=["URSI",
             "stranger"]).fillna(False)
-    print(table)
+    table.to_csv("participants_conditions.csv", index=False)
     
 def update_set(s, d):
     """
