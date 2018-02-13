@@ -17,6 +17,8 @@ Authors:
 import os
 import unicodecsv
 import urllib
+from waiting import wait
+
 
 def create_sample_row(ursi, replacement, condition, config):
     """
@@ -45,6 +47,7 @@ def create_sample_row(ursi, replacement, condition, config):
     except FileNotFoundError:
         print ("no such directory: " + ursi_dir)
     return sample_row
+
 
 def create_samples(config):
     """
@@ -96,6 +99,7 @@ def create_samples(config):
                     for item in sample[(replacement, condition)]:
                         feature_writer.writerow(item)
 
+                        
 def get_features(csv_file, config):
     """
     Function to get features from openSMILE
@@ -137,6 +141,39 @@ def get_features(csv_file, config):
                 )
             )
     return(temp_list)
+                
+                
+def http_wait(request, timeout_seconds=30):
+    """
+    Function to try request repeatedly for specified time
+    
+    Parameters
+    ----------
+    request: function
+        request to try
+        
+    timeout_seconds: int
+        default=30
+    
+    Returns
+    -------
+    response: str or object or False
+        request response or False
+    """
+    try:
+        response = wait(
+            request,
+            timeout_seconds
+        )
+    except:
+        response = False
+    return(
+        response if response else http_wait(
+            request,
+            timeout_seconds
+        )
+    )
+
 
 def feature_reader(f, num_features):
     """
@@ -174,6 +211,7 @@ def feature_reader(f, num_features):
             pass
     return(temp_list)
 
+
 def get_dx(ursi, dx_dictionary=None):
     """
     Function to get a participant's diagnosis
@@ -199,6 +237,7 @@ def get_dx(ursi, dx_dictionary=None):
     except (KeyError):
         return 'unknown'
         
+        
 def get_dx_dictionary():
     """
     Function to create a diagnosis dictionary
@@ -220,6 +259,7 @@ def get_dx_dictionary():
             dx_dictionary[row['URSI']] = row['Dx?']
         return dx_dictionary
 
+    
 def get_num_features(config, features={}):
     """
     Function to get the number of features in an openSMILE config
@@ -242,6 +282,7 @@ def get_num_features(config, features={}):
         else:
             return 0
 
+        
 def main():
     global features
     features = {}

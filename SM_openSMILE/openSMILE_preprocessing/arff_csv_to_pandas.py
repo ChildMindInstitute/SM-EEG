@@ -181,6 +181,7 @@ def replace_unknown(arff_path):
         arff formatted data string
     """
     temp_oS = open(arff_path, 'r')
+    print(temp_oS)
     temp_oS_lines = temp_oS.readlines()
     temp_oS_string = ""
     for temp_oS_line in temp_oS_lines:
@@ -198,7 +199,7 @@ def replace_unknown(arff_path):
     tof = open(tempcsv, "w")
     tof.write(temp_oS_string)
     tof.close()
-    oS_data = arff.loads(open(tempcsv))
+    oS_data = arff.loads(tempcsv)
     subprocess.run("rm temp.csv", shell=True)
     return(oS_data)
 

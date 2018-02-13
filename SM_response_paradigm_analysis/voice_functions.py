@@ -1,6 +1,16 @@
 #!/usr/bin/env python
+import json
 import numpy as np
+import os
 import pandas as pd
+import sys
+sm_rpa_v = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+if sm_rpa_v not in sys.path: 
+    sys.path.append(sm_rpa_v)
+from SM_openSMILE.openSMILE_analysis import openSMILE_csv
+with open(os.path.join('../config/config.json')) as cfgf:
+    osf = json.load(cfgf)['OSF_urls']
+
 
 def combine_data(openSMILE, conditions, dx):
     """
@@ -26,6 +36,69 @@ def combine_data(openSMILE, conditions, dx):
     d = pd.merge(dx, openSMILE, on='URSI', how='right')
     d2 = pd.merge(d, conditions, on=['URSI', 'stranger'], how='left')
     return(d2)
+
+
+def feature_names(df, config_file):
+    """
+    Function to gather and apply column names to an openSMILE dataframe
+    
+    Parameters
+    ----------
+    df: DataFrame
+        with columns ["X", "Y"]
+    
+    config_file: str
+        basename for openSMILE config file, eg, ComParE_2016
+        
+    Returns
+    -------
+    df: DataFrame
+        with appropriate column headers
+        ("Y" is now "Selective Mutism diagnosis")
+    """
+    smdx = df["Y"]
+    rows = [
+        row for row in df["X"]
+    ]
+    df = pd.DataFrame(
+        {
+            i: rows[
+                i
+            ] for i in range(
+                len(
+                    rows
+                )
+            )
+        }
+    ).T
+    with open(
+        os.path.join(
+            sm_rpa_v,
+            "SM_openSMILE/openSMILE_preprocessing/openSMILE_outputs",
+            config_file,
+            "full_original.csv"
+        )
+    ) as f:
+        arf_features=f.readlines()
+    df.columns = [
+        f[
+            len(
+                "@attribute"
+            )+1:
+        ].split(
+            " "
+        )[
+            0
+        ] for f in arf_features if f.startswith(
+            "@attribute"
+        )
+    ]
+    df["Selective Mutism diagnosis"] = [
+        'SM' == "".join(
+            y
+        ) for y in smdx
+    ]
+    return(df)
 
 
 def int_categorize(df):
@@ -58,6 +131,79 @@ def int_categorize(df):
                 u,
                 int)
     return(df)
+
+
+def load_from_osf(config_file, experimental_condition, noise_replacement):
+    """
+    
+    Parameters
+    ----------
+    config_file: str
+        basename of openSMILE configuration file, eg `emobase`
+        
+    experimental_condition: str
+        experimental condition, eg, `voice, no stranger`
+        
+    noise_replacement: str
+        noise replacement condition, eg, `adults replaced: clone`
+    """
+    return(
+        feature_names(
+            pd.DataFrame(
+                openSMILE_csv.get_features(
+                    osf[
+                        config_file
+                    ][
+                        experimental_condition
+                    ][
+                        noise_replacement
+                    ],
+                    config_file
+                ),
+                columns=[
+                    "X",
+                    "Y"
+                ]
+            ),
+            config_file
+        )
+    )
+
+
+def make_forest(configed_df):
+    """
+    Function to get training and target data, filling in unaltered rows when no
+    altered row exists
+
+    Parameters
+    ----------     
+    configed_df : pandas DataFrame
+        DataFrame with openSMILE output and demographic features
+
+    Returns
+    -------
+    x_trees : numpy array
+        array of [n_participants × n_features] size
+        filled with training data (features)
+
+    y_trees : numpy array
+        array of [n_participants × n_dx_features] size
+        filled with target data (diagnoses)
+    """
+    # ycols = [col for col in configed_df.columns if ('smq' in col)] + ['Dx?','URSI']
+    ycols = ['Selective Mutism diagnosis']
+    xcols = configed_df.columns.difference(ycols)
+    for col in xcols:
+        try:
+            float(configed_df[col][0])
+        except:
+            enc = LabelEncoder()
+            enc.fit(np.array(configed_df[col]))
+            configed_df[col] = enc.transform(np.array(configed_df[col]))
+    xtrees = np.array(configed_df[xcols]).reshape(len(configed_df), len(xcols))
+    ytrees = np.array(configed_df[ycols]).reshape(len(configed_df), len(ycols)).ravel()
+    return (xtrees, ytrees)
+
 
 def reencode(df, mapping, field, dtype=None):
     """
@@ -131,38 +277,3 @@ def update_encoding(df, mapping, field, dtype=None):
         else:
             df = reencode(df, mapping, field, dtype)
         return(df)
-        
-
-def make_forest(configed_df):
-    """
-    Function to get training and target data, filling in unaltered rows when no
-    altered row exists
-
-    Parameters
-    ----------     
-    configed_df : pandas DataFrame
-        DataFrame with openSMILE output and demographic features
-
-    Returns
-    -------
-    x_trees : numpy array
-        array of [n_participants × n_features] size
-        filled with training data (features)
-
-    y_trees : numpy array
-        array of [n_participants × n_dx_features] size
-        filled with target data (diagnoses)
-    """
-    # ycols = [col for col in configed_df.columns if ('smq' in col)] + ['Dx?','URSI']
-    ycols = ['Dx?']
-    xcols = configed_df.columns.difference(ycols)
-    for col in xcols:
-        try:
-            float(configed_df[col][0])
-        except:
-            enc = LabelEncoder()
-            enc.fit(np.array(configed_df[col]))
-            configed_df[col] = enc.transform(np.array(configed_df[col]))
-    xtrees = np.array(configed_df[xcols]).reshape(len(configed_df), len(xcols))
-    ytrees = np.array(configed_df[ycols]).reshape(len(configed_df), len(ycols)).ravel()
-    return (xtrees, ytrees)
