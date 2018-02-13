@@ -4,11 +4,28 @@ import numpy as np
 import os
 import pandas as pd
 import sys
-sm_rpa_v = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+sm_rpa_v = os.path.abspath(os.getcwd())
+while not os.path.exists(
+    os.path.join(
+        sm_rpa_v,
+        "SM_response_paradigm_analysis"
+    )
+):
+    sm_rpa_v = os.path.abspath(
+        os.path.join(
+            sm_rpa_v,
+            os.pardir
+        )
+    )
 if sm_rpa_v not in sys.path: 
     sys.path.append(sm_rpa_v)
 from SM_openSMILE.openSMILE_analysis import openSMILE_csv
-with open(os.path.join('../config/config.json')) as cfgf:
+with open(
+    os.path.join(
+        sm_rpa_v,
+        'config/config.json'
+    )
+) as cfgf:
     osf = json.load(cfgf)['OSF_urls']
 
 
