@@ -3,6 +3,7 @@ import json
 import numpy as np
 import os
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 import sys
 sm_rpa_v = os.path.abspath(os.getcwd())
 while not os.path.exists(
@@ -251,6 +252,111 @@ def reencode(df, mapping, field, dtype=None):
         else:
             df[field] = df[field].map(mapping)
     return(df)
+
+
+def SM_forest(all_dict, config_file, condition, noise_replacement, ntrees=2000):
+    """
+    Function to run random forests on one
+    config file × exprimental condition × noise replacement method
+    
+    Parameters
+    ----------
+    all_dict: dictionary
+        [config][experimental condition][noise replacement method]["DataFrame"] keys
+        
+    config_file: str
+        openSMILE config file basename
+        
+    condition: str
+        experimental condition
+        
+    noise_replacement: str
+        noise replacement method
+        
+    ntrees: int, optional
+        number of 🌲s, default=2,000
+        
+    Returns
+    -------
+    features: DataFrame
+        features ranked by importance
+        
+    model: RandomForestClassifier
+        fit model
+    """
+    X = int_categorize(
+        all_dict[
+            config_file
+        ][
+            condition
+        ][
+            noise_replacement
+        ][
+            "DataFrame"
+        ].loc[
+            :,
+            all_dict[
+                config_file
+            ][
+                condition
+            ][
+                noise_replacement
+            ][
+                "DataFrame"
+            ].columns.difference([
+                "Selective Mutism diagnosis"
+            ])
+        ]
+    )
+    Y = all_dict[
+        config_file
+    ][
+        condition
+    ][
+        noise_replacement
+    ][
+        "DataFrame"
+    ][
+        "Selective Mutism diagnosis"
+    ]
+    clf = RandomForestClassifier(
+        n_estimators=ntrees,
+        oob_score = True
+    )
+    clf = clf.fit(
+        X,
+        Y
+    )
+    features = pd.DataFrame.from_dict(
+        dict(
+            zip(
+                X,
+                clf.feature_importances_
+            )
+        ),
+        orient='index'
+    ).rename(
+        columns={
+            0:"importance"
+        }
+    ).sort_values(
+        "importance",
+        ascending=False
+    )
+    print(
+        "Most predictive feature for {0} config file "
+        "× {1} × {2} was {3} with an importance score "
+        "of {4}".format(
+            config_file,
+            condition,
+            noise_replacement,
+            features.ix[0].name,
+            features.ix[0].importance
+        )
+    return(
+        features,
+        clf
+    )
 
 
 def update_encoding(df, mapping, field, dtype=None):
