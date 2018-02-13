@@ -14,7 +14,9 @@ Authors:
 © 2016-2017, Child Mind Institute, Apache v2.0 License
 """
 
-import csv, os
+import os
+import unicodecsv
+import urllib
 
 def create_sample_row(ursi, replacement, condition, config):
     """
@@ -113,18 +115,64 @@ def get_features(csv_file, config):
         list of features from emobase output file
     """
     num_features = get_num_features(config)
-    with open(csv_file, 'r') as f:
-        reader = csv.reader(f)
-        temp_list = []
-        for row in reader:
-            temp_list.append(row)
-        temp_list = ''.join(temp_list[num_features + 2][1]).split(',')
-        for item in temp_list:
-            try:
-                item = float(item)
-            except (TypeError, ValueError):
-                pass
-    return temp_list
+    if "http" in csv_file or "ftp" in csv_file:
+        f = unicodecsv.reader(
+            urllib.request.urlopen(
+                csv_file
+            )
+        )
+        return(
+            feature_reader(
+                f,
+                num_features
+            )
+        )
+    else:
+        with open(csv_file, 'r') as f:
+            reader = csv.reader(f)
+            return(
+                feature_reader(
+                    reader,
+                    num_features
+                )
+            )
+    return(temp_list)
+
+def feature_reader(f, num_features):
+    """
+    Function to read csv to list
+    
+    Parameters
+    ----------
+    f: file
+        open CSV
+        
+    num_features: int
+        number of features expected
+    
+    Returns
+    -------
+    temp_list: list
+        list of features
+    """
+    temp_list = []
+    if isinstance(
+        f,
+        unicodecsv.py3.UnicodeReader
+    ):
+        for row in f:
+            if len(row):
+                temp_list.append(*[eval(r) for r in row])
+        return(temp_list)
+    for row in f:
+        temp_list.append(row)
+    temp_list = ''.join(temp_list[num_features + 2][1]).split(',')
+    for item in temp_list:
+        try:
+            item = float(item)
+        except (TypeError, ValueError):
+            pass
+    return(temp_list)
 
 def get_dx(ursi, dx_dictionary=None):
     """
@@ -172,7 +220,7 @@ def get_dx_dictionary():
             dx_dictionary[row['URSI']] = row['Dx?']
         return dx_dictionary
 
-def get_num_features(config):
+def get_num_features(config, features={}):
     """
     Function to get the number of features in an openSMILE config
     output CSV.
