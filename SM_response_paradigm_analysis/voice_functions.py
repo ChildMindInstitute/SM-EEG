@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import json
 import numpy as np
+import matplotlib as plt
 import os
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestRegressor
 import sys
 sm_rpa_v = os.path.abspath(os.getcwd())
 while not os.path.exists(
@@ -319,7 +320,7 @@ def SM_forest(all_dict, config_file, condition, noise_replacement, ntrees=2000):
     ][
         "Selective Mutism diagnosis"
     ]
-    clf = RandomForestClassifier(
+    clf = RandomForestRegressor(
         n_estimators=ntrees,
         oob_score = True
     )
@@ -353,6 +354,7 @@ def SM_forest(all_dict, config_file, condition, noise_replacement, ntrees=2000):
             features.ix[0].name,
             features.ix[0].importance
         )
+    )
     return(
         features,
         clf
